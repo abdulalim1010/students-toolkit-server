@@ -20,6 +20,7 @@ const client = new MongoClient(uri, {
   },
 });
 let usersCollection
+let examsCollection
 
 async function run() {
   try {
@@ -28,6 +29,7 @@ async function run() {
     
     const database = client.db("toolkit");
     usersCollection = database.collection("users");
+    examsCollection = database.collection("exams");
   } catch (err) {
     console.error(err);
   }
@@ -59,6 +61,31 @@ app.post("/users", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+//examps api
+// Routes
+// Get all exams
+app.get("/api/exams", async (req, res) => {
+  try {
+    const exams = await examsCollection.find().sort({ date: 1 }).toArray(); // ascending by date
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add a new exam
+app.post("/api/exams", async (req, res) => {
+  try {
+    const newExam = req.body; // { subject, date, description }
+    const result = await examsCollection.insertOne(newExam);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 
 
 // Start server
