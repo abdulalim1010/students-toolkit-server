@@ -22,6 +22,7 @@ const client = new MongoClient(uri, {
 let usersCollection
 let examsCollection
 let attendanceCollection
+let feesCollection;
 
 async function run() {
   try {
@@ -32,6 +33,7 @@ async function run() {
     usersCollection = database.collection("users");
     examsCollection = database.collection("exams");
     attendanceCollection = database.collection("attendance");
+     feesCollection = database.collection("fees");
   } catch (err) {
     console.error(err);
   }
@@ -110,7 +112,39 @@ app.post("/api/attendance", async (req, res) => {
   }
 });
 
+//fees api 
 
+// Get all fees
+app.get("/api/fees", async (req, res) => {
+  try {
+    const fees = await feesCollection.find().toArray();
+    res.json(fees);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add a new fee record
+app.post("/api/fees", async (req, res) => {
+  try {
+    const newFee = req.body;
+    /* Example JSON:
+      {
+        "studentId": "STU001",
+        "admissionFee": 5000,
+        "tuitionFee": 2000,
+        "seminarFee": 500,
+        "formFillupFee": 800,
+        "labFee": 1000,
+        "paidDate": "2025-09-10"
+      }
+    */
+    const result = await feesCollection.insertOne(newFee);
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 
 // Start server
