@@ -21,6 +21,7 @@ const client = new MongoClient(uri, {
 });
 let usersCollection
 let examsCollection
+let attendanceCollection
 
 async function run() {
   try {
@@ -30,6 +31,7 @@ async function run() {
     const database = client.db("toolkit");
     usersCollection = database.collection("users");
     examsCollection = database.collection("exams");
+    attendanceCollection = database.collection("attendance");
   } catch (err) {
     console.error(err);
   }
@@ -85,6 +87,29 @@ app.post("/api/exams", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+//attendance api
+// Attendance API
+// Attendance API
+app.get("/api/attendance", async (req, res) => {
+  try {
+    const attendance = await attendanceCollection.find().toArray();
+    res.json(attendance);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/attendance", async (req, res) => {
+  try {
+    const newAttendance = req.body; 
+    // Example: { studentId: "123", date: "2025-09-10", status: "Present" }
+    const result = await attendanceCollection.insertOne(newAttendance);
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 
 
