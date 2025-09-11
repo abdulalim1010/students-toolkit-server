@@ -23,6 +23,7 @@ let usersCollection
 let examsCollection
 let attendanceCollection
 let feesCollection;
+let notificationsCollection;
 
 async function run() {
   try {
@@ -33,7 +34,8 @@ async function run() {
     usersCollection = database.collection("users");
     examsCollection = database.collection("exams");
     attendanceCollection = database.collection("attendance");
-     feesCollection = database.collection("fees");
+    feesCollection = database.collection("fees");
+    notificationsCollection = database.collection("notifications");
   } catch (err) {
     console.error(err);
   }
@@ -145,6 +147,32 @@ app.post("/api/fees", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+app.get("/api/notifications", async (req, res) => {
+  try {
+    const notifications = await notificationsCollection
+      .find()
+      .sort({ createdAt: -1 }) // latest first
+      .toArray();
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add new notification
+app.post("/api/notifications", async (req, res) => {
+  try {
+    const newNotification = {
+      ...req.body,
+      createdAt: new Date(),
+    };
+    const result = await notificationsCollection.insertOne(newNotification);
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 
 // Start server
