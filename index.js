@@ -3,6 +3,7 @@ const express = require("express");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 require("dotenv").config();
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 
 
 const app = express();
@@ -68,8 +69,37 @@ app.post("/users", async (req, res) => {
   }
 });
 
+///emails 
+app.post("/send-email", async (req, res) => {
+  const { name, email, message } = req.body;
 
-//examps api
+  try {
+    // Nodemailer transporter setup
+    let transporter = nodemailer.createTransport({
+      service: "gmail", // or outlook, yahoo etc.
+      auth: {
+        user: process.env.EMAIL_USER, // your email
+        pass: process.env.EMAIL_PASS, // your app password
+      },
+    });
+
+    // Mail options
+   let mailOptions = {
+  from: process.env.EMAIL_USER, // তোমার gmail address
+  replyTo: email,               // ইউজারের email reply হিসেবে যাবে
+  to: process.env.EMAIL_USER,
+  subject: `New Contact Message from ${name}`,
+  text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+};
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: "Email sent successfully" });
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).json({ success: false, message: "Failed to send email" });
+  }
+});
+
 // Routes
 // Get all exams
 app.get("/api/exams", async (req, res) => {
